@@ -1,0 +1,1440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HALAL MACRO</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #080c08;
+  --surface: #101510;
+  --card: #161d16;
+  --border: #1e2a1e;
+  --border2: #263326;
+  --accent: #5ddb6e;
+  --accent-dim: rgba(93,219,110,0.12);
+  --gold: #f5c842;
+  --gold-dim: rgba(245,200,66,0.1);
+  --red: #e05c5c;
+  --red-dim: rgba(224,92,92,0.1);
+  --blue: #5ba8f5;
+  --blue-dim: rgba(91,168,245,0.1);
+  --text: #edf2ed;
+  --muted: #5a7060;
+  --muted2: #3a4e3a;
+  --radius: 14px;
+
+  /* mode colours - default bulk */
+  --mode-color: #5ddb6e;
+  --mode-dim: rgba(93,219,110,0.12);
+}
+
+body[data-mode="bulk"] { --mode-color: #5ddb6e; --mode-dim: rgba(93,219,110,0.12); }
+body[data-mode="maintain"] { --mode-color: #f5c842; --mode-dim: rgba(245,200,66,0.1); }
+body[data-mode="cut"] { --mode-color: #e05c5c; --mode-dim: rgba(224,92,92,0.1); }
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Instrument Sans', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── HEADER ── */
+.app-header {
+  padding: 22px 28px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 1.6rem;
+  color: var(--accent);
+  letter-spacing: -0.5px;
+  line-height: 1;
+}
+.logo span { color: var(--gold); }
+.logo sub { font-size: 0.55rem; letter-spacing: 2px; color: var(--muted); display: block; margin-top: 2px; font-weight: 400; font-family: 'Instrument Sans', sans-serif; }
+
+.halal-badge {
+  background: var(--accent-dim);
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--accent);
+  padding: 5px 13px;
+}
+
+/* ── MODE SWITCHER ── */
+.mode-switcher {
+  display: flex;
+  gap: 8px;
+  padding: 18px 28px 0;
+}
+
+.mode-btn {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 10px;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.25s;
+  position: relative;
+  overflow: hidden;
+}
+
+.mode-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+
+.mode-btn[data-m="bulk"]::before { background: var(--accent-dim); }
+.mode-btn[data-m="maintain"]::before { background: var(--gold-dim); }
+.mode-btn[data-m="cut"]::before { background: var(--red-dim); }
+
+.mode-btn.active::before { opacity: 1; }
+
+.mode-btn.active[data-m="bulk"] { border-color: var(--accent); }
+.mode-btn.active[data-m="maintain"] { border-color: var(--gold); }
+.mode-btn.active[data-m="cut"] { border-color: var(--red); }
+
+.mb-icon { font-size: 1.3rem; display: block; margin-bottom: 4px; position: relative; }
+.mb-label {
+  font-family: 'Syne', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  position: relative;
+  transition: color 0.25s;
+}
+
+.mode-btn.active[data-m="bulk"] .mb-label { color: var(--accent); }
+.mode-btn.active[data-m="maintain"] .mb-label { color: var(--gold); }
+.mode-btn.active[data-m="cut"] .mb-label { color: var(--red); }
+
+.mb-sub {
+  font-size: 0.62rem;
+  color: var(--muted2);
+  margin-top: 2px;
+  position: relative;
+}
+
+/* ── TABS ── */
+.tabs {
+  display: flex;
+  gap: 2px;
+  padding: 18px 28px 0;
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.tabs::-webkit-scrollbar { display: none; }
+
+.tab {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 10px 16px 14px;
+  cursor: pointer;
+  position: relative;
+  transition: color 0.2s;
+  white-space: nowrap;
+}
+.tab::after {
+  content: '';
+  position: absolute;
+  bottom: -1px; left: 16px; right: 16px;
+  height: 2px;
+  background: var(--mode-color);
+  border-radius: 2px 2px 0 0;
+  transform: scaleX(0);
+  transition: transform 0.2s;
+}
+.tab.active { color: var(--mode-color); }
+.tab.active::after { transform: scaleX(1); }
+.tab:hover:not(.active) { color: var(--text); }
+
+/* ── PANELS ── */
+.panels { padding: 22px 28px; }
+.panel { display: none; animation: fadeIn 0.2s ease; }
+.panel.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* ── MODE BANNER ── */
+.mode-banner {
+  background: var(--mode-dim);
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.mode-banner-icon { font-size: 1.5rem; }
+.mode-banner-text h4 {
+  font-family: 'Syne', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--mode-color);
+  margin-bottom: 2px;
+}
+.mode-banner-text p { font-size: 0.75rem; color: var(--muted); line-height: 1.4; }
+
+/* ── MACRO CARDS ── */
+.macro-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.macro-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 12px;
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+}
+
+.macro-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+}
+.macro-card.cal::before { background: var(--gold); }
+.macro-card.prot::before { background: var(--accent); }
+.macro-card.carb::before { background: var(--blue); }
+.macro-card.fat::before { background: var(--red); }
+
+.mc-label { font-size: 0.58rem; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 5px; }
+.mc-val { font-family: 'Syne', sans-serif; font-size: 1.55rem; font-weight: 700; line-height: 1; }
+.macro-card.cal .mc-val { color: var(--gold); }
+.macro-card.prot .mc-val { color: var(--accent); }
+.macro-card.carb .mc-val { color: var(--blue); }
+.macro-card.fat .mc-val { color: var(--red); }
+.mc-unit { font-size: 0.62rem; color: var(--muted); margin-top: 3px; }
+
+/* Progress bars row */
+.progress-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 18px;
+  margin-bottom: 18px;
+  display: none;
+}
+
+.prog-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.prog-row:last-child { margin-bottom: 0; }
+
+.prog-name { font-size: 0.68rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); width: 46px; flex-shrink: 0; }
+.prog-track { flex: 1; height: 5px; background: var(--border2); border-radius: 3px; overflow: hidden; }
+.prog-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
+.prog-fill.cal-f { background: var(--gold); }
+.prog-fill.prot-f { background: var(--accent); }
+.prog-fill.carb-f { background: var(--blue); }
+.prog-fill.fat-f { background: var(--red); }
+.prog-fill.over { background: var(--red) !important; }
+.prog-nums { font-size: 0.72rem; font-weight: 600; color: var(--text); width: 80px; text-align: right; flex-shrink: 0; }
+
+/* ── INPUT CARD ── */
+.input-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  margin-bottom: 16px;
+}
+
+.input-row { display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; }
+
+.ig { flex: 1; min-width: 150px; }
+.ig label {
+  display: block;
+  font-size: 0.62rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.ig input, .ig select, .ig textarea {
+  width: 100%;
+  background: var(--card);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 0.88rem;
+  padding: 10px 13px;
+  outline: none;
+  transition: border-color 0.2s;
+  -webkit-appearance: none;
+}
+.ig input:focus, .ig select:focus, .ig textarea:focus { border-color: var(--mode-color); }
+.ig input::placeholder, .ig textarea::placeholder { color: var(--muted2); }
+.ig select option { background: #101510; }
+.ig-sm { width: 95px; flex: none; }
+
+.btn-primary {
+  background: var(--mode-color);
+  color: #050f05;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 0.88rem;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s;
+  white-space: nowrap;
+  flex: none;
+}
+.btn-primary:hover { opacity: 0.85; }
+.btn-primary:active { transform: scale(0.97); }
+.btn-primary:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.btn-secondary {
+  background: var(--card);
+  color: var(--muted);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 0.78rem;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-secondary:hover { border-color: var(--mode-color); color: var(--mode-color); }
+
+.status {
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin-top: 9px;
+  min-height: 18px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.status.loading { color: var(--accent); }
+.status.error { color: var(--red); }
+
+.spinner {
+  width: 12px; height: 12px;
+  border: 2px solid var(--border2);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── FOOD LIST ── */
+.log-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.section-title {
+  font-size: 0.62rem;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.food-list { display: flex; flex-direction: column; gap: 7px; }
+
+.food-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: slideIn 0.22s ease;
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fi-emoji { font-size: 1.25rem; flex-shrink: 0; }
+.fi-info { flex: 1; min-width: 0; }
+.fi-name { font-weight: 500; font-size: 0.88rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fi-sub { font-size: 0.7rem; color: var(--muted); }
+.fi-macros { display: flex; gap: 5px; flex-wrap: wrap; }
+
+.mpill {
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+.mpill.c { background: var(--gold-dim); color: var(--gold); }
+.mpill.p { background: var(--accent-dim); color: var(--accent); }
+.mpill.cb { background: var(--blue-dim); color: var(--blue); }
+.mpill.f { background: var(--red-dim); color: var(--red); }
+
+.del-btn {
+  background: none;
+  border: none;
+  color: var(--muted2);
+  font-size: 0.95rem;
+  cursor: pointer;
+  padding: 2px;
+  transition: color 0.2s;
+  flex-shrink: 0;
+}
+.del-btn:hover { color: var(--red); }
+
+.empty-state { text-align: center; padding: 32px 20px; color: var(--muted); font-size: 0.85rem; }
+.empty-icon { font-size: 2rem; margin-bottom: 7px; }
+
+/* ── METRICS TAB ── */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.results-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-top: 16px;
+}
+.results-card h3 {
+  font-family: 'Syne', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--mode-color);
+  margin-bottom: 14px;
+}
+
+/* Full macro breakdown table */
+.macro-breakdown {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.mbd-card {
+  background: var(--card);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  padding: 14px;
+  position: relative;
+}
+.mbd-card::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 10px; bottom: 10px;
+  width: 3px;
+  border-radius: 2px;
+}
+.mbd-card.cal::before { background: var(--gold); }
+.mbd-card.prot::before { background: var(--accent); }
+.mbd-card.carb::before { background: var(--blue); }
+.mbd-card.fat::before { background: var(--red); }
+.mbd-card.fibre::before { background: #a78bfa; }
+.mbd-card.water::before { background: #22d3ee; }
+
+.mbd-card { padding-left: 18px; }
+.mbd-label { font-size: 0.62rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+.mbd-val { font-family: 'Syne', sans-serif; font-size: 1.3rem; font-weight: 700; }
+.mbd-card.cal .mbd-val { color: var(--gold); }
+.mbd-card.prot .mbd-val { color: var(--accent); }
+.mbd-card.carb .mbd-val { color: var(--blue); }
+.mbd-card.fat .mbd-val { color: var(--red); }
+.mbd-card.fibre .mbd-val { color: #a78bfa; }
+.mbd-card.water .mbd-val { color: #22d3ee; }
+.mbd-sub { font-size: 0.68rem; color: var(--muted); margin-top: 2px; }
+
+.mrr {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border);
+}
+.mrr:last-child { border-bottom: none; }
+.mrr-label { font-size: 0.8rem; color: var(--muted); }
+.mrr-val { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; }
+
+.ai-advice {
+  background: var(--mode-dim);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-top: 14px;
+  font-size: 0.82rem;
+  line-height: 1.65;
+  color: var(--text);
+}
+
+/* ── OPTIMISED PLAN ── */
+.plan-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-top: 14px;
+}
+.plan-section h3 {
+  font-family: 'Syne', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--mode-color);
+  margin-bottom: 6px;
+}
+.plan-section p { font-size: 0.82rem; color: var(--muted); margin-bottom: 14px; }
+
+.plan-pillars {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.pillar {
+  background: var(--card);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  padding: 13px;
+}
+.pillar-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--mode-color);
+  margin-bottom: 6px;
+}
+.pillar ul { padding-left: 14px; }
+.pillar li { font-size: 0.75rem; color: var(--muted); line-height: 1.55; margin-bottom: 2px; }
+
+.plan-ai {
+  background: var(--card);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-top: 10px;
+  font-size: 0.8rem;
+  line-height: 1.65;
+  color: var(--text);
+}
+
+/* ── MEAL PLANNER & SUGGESTIONS ── */
+.rich-result {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-top: 16px;
+  font-size: 0.85rem;
+  line-height: 1.7;
+}
+.rich-result h3 { font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 700; color: var(--mode-color); margin-bottom: 12px; }
+.rich-result h4 { font-family: 'Syne', sans-serif; font-weight: 600; color: var(--gold); margin: 13px 0 5px; }
+.rich-result p { margin-bottom: 7px; color: var(--text); }
+.rich-result ul { padding-left: 16px; margin-bottom: 7px; }
+.rich-result li { margin-bottom: 3px; color: var(--muted); }
+.rich-result strong { color: var(--accent); }
+
+/* ── PHOTO SCAN ── */
+.photo-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 14px 0;
+  color: var(--muted2);
+  font-size: 0.72rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.photo-divider::before,
+.photo-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border2);
+}
+
+.btn-photo {
+  width: 100%;
+  background: var(--card);
+  border: 1.5px dashed var(--border2);
+  border-radius: 10px;
+  padding: 14px 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.2s;
+  color: var(--text);
+  font-family: 'Instrument Sans', sans-serif;
+}
+.btn-photo:hover {
+  border-color: var(--mode-color);
+  background: var(--mode-dim);
+}
+.btn-photo-icon { font-size: 1.5rem; flex-shrink: 0; }
+.btn-photo > span:nth-child(2) { font-weight: 600; font-size: 0.9rem; flex: 1; text-align: left; }
+.btn-photo-sub { font-size: 0.7rem; color: var(--muted); }
+
+.photo-preview-inner {
+  position: relative;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-top: 12px;
+  border: 1px solid var(--border2);
+}
+.photo-preview-inner img {
+  width: 100%;
+  max-height: 220px;
+  object-fit: cover;
+  display: block;
+}
+.photo-clear-btn {
+  position: absolute;
+  top: 8px; right: 8px;
+  background: rgba(0,0,0,0.6);
+  border: none;
+  color: #fff;
+  font-size: 0.9rem;
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+.photo-clear-btn:hover { background: var(--red); }
+
+/* scanned items get a camera badge */
+.fi-photo-badge {
+  font-size: 0.62rem;
+  background: var(--mode-dim);
+  color: var(--mode-color);
+  border-radius: 4px;
+  padding: 1px 6px;
+  margin-left: 5px;
+  vertical-align: middle;
+}
+
+@media (max-width: 520px) {
+  .macro-grid { grid-template-columns: 1fr 1fr; }
+  .plan-pillars { grid-template-columns: 1fr; }
+  .macro-breakdown { grid-template-columns: 1fr; }
+  .metrics-grid { grid-template-columns: 1fr; }
+  .mode-switcher { gap: 6px; }
+  .panels { padding: 18px 16px; }
+  .app-header { padding: 18px 16px 0; }
+  .tabs { padding: 16px 16px 0; }
+  .mode-switcher { padding: 16px 16px 0; }
+}
+</style>
+</head>
+<body data-mode="bulk">
+
+<div class="app-header">
+  <div class="logo">HALAL<span>MACRO</span><sub>☪ Halal · AI Powered</sub></div>
+  <div class="halal-badge">☪ Halal</div>
+</div>
+
+<!-- MODE SWITCHER -->
+<div class="mode-switcher">
+  <button class="mode-btn active" data-m="bulk" onclick="setMode('bulk')">
+    <span class="mb-icon">📈</span>
+    <div class="mb-label">BULK</div>
+    <div class="mb-sub">Add muscle</div>
+  </button>
+  <button class="mode-btn" data-m="maintain" onclick="setMode('maintain')">
+    <span class="mb-icon">⚖️</span>
+    <div class="mb-label">MAINTAIN</div>
+    <div class="mb-sub">Stay steady</div>
+  </button>
+  <button class="mode-btn" data-m="cut" onclick="setMode('cut')">
+    <span class="mb-icon">🔥</span>
+    <div class="mb-label">CUT</div>
+    <div class="mb-sub">Lose fat</div>
+  </button>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('tracker')">📊 Tracker</button>
+  <button class="tab" onclick="switchTab('metrics')">⚖️ Metrics & Plan</button>
+  <button class="tab" onclick="switchTab('planner')">🍳 Meal Planner</button>
+  <button class="tab" onclick="switchTab('suggest')">💡 Daily Plan</button>
+</div>
+
+<div class="panels">
+
+<!-- ══════════ TRACKER ══════════ -->
+<div class="panel active" id="panel-tracker">
+
+  <div id="mode-banner-tracker" class="mode-banner">
+    <div class="mode-banner-icon" id="mbanner-icon">📈</div>
+    <div class="mode-banner-text">
+      <h4 id="mbanner-title">BULK MODE</h4>
+      <p id="mbanner-desc">Calorie surplus · High protein · Build lean mass</p>
+    </div>
+  </div>
+
+  <div class="macro-grid">
+    <div class="macro-card cal"><div class="mc-label">Calories</div><div class="mc-val" id="tot-cal">0</div><div class="mc-unit">kcal</div></div>
+    <div class="macro-card prot"><div class="mc-label">Protein</div><div class="mc-val" id="tot-prot">0</div><div class="mc-unit">g</div></div>
+    <div class="macro-card carb"><div class="mc-label">Carbs</div><div class="mc-val" id="tot-carb">0</div><div class="mc-unit">g</div></div>
+    <div class="macro-card fat"><div class="mc-label">Fat</div><div class="mc-val" id="tot-fat">0</div><div class="mc-unit">g</div></div>
+  </div>
+
+  <div class="progress-section" id="progress-section">
+    <div class="prog-row">
+      <div class="prog-name">CALS</div>
+      <div class="prog-track"><div class="prog-fill cal-f" id="pf-cal" style="width:0%"></div></div>
+      <div class="prog-nums"><span id="pn-cal">0</span> / <span id="pt-cal">—</span></div>
+    </div>
+    <div class="prog-row">
+      <div class="prog-name">PROT</div>
+      <div class="prog-track"><div class="prog-fill prot-f" id="pf-prot" style="width:0%"></div></div>
+      <div class="prog-nums"><span id="pn-prot">0</span>g / <span id="pt-prot">—</span>g</div>
+    </div>
+    <div class="prog-row">
+      <div class="prog-name">CARBS</div>
+      <div class="prog-track"><div class="prog-fill carb-f" id="pf-carb" style="width:0%"></div></div>
+      <div class="prog-nums"><span id="pn-carb">0</span>g / <span id="pt-carb">—</span>g</div>
+    </div>
+    <div class="prog-row">
+      <div class="prog-name">FAT</div>
+      <div class="prog-track"><div class="prog-fill fat-f" id="pf-fat" style="width:0%"></div></div>
+      <div class="prog-nums"><span id="pn-fat">0</span>g / <span id="pt-fat">—</span>g</div>
+    </div>
+  </div>
+
+  <div class="input-card">
+    <div class="input-row">
+      <div class="ig">
+        <label>Food Item</label>
+        <input type="text" id="food-input" placeholder="e.g. lamb chops, brown rice, Greek yoghurt…" />
+      </div>
+      <div class="ig ig-sm">
+        <label>Amount</label>
+        <input type="text" id="qty-input" placeholder="200g" />
+      </div>
+      <button class="btn-primary" id="add-btn" onclick="addFood()">ADD</button>
+    </div>
+
+    <div class="photo-divider"><span>or</span></div>
+
+    <!-- Photo scan -->
+    <input type="file" id="photo-input" accept="image/*" capture="environment" style="display:none" onchange="handlePhoto(event)" />
+    <button class="btn-photo" onclick="document.getElementById('photo-input').click()">
+      <span class="btn-photo-icon">📷</span>
+      <span>Scan Food Photo</span>
+      <span class="btn-photo-sub">AI analyses your plate</span>
+    </button>
+
+    <!-- Preview area -->
+    <div id="photo-preview-wrap" style="display:none">
+      <div class="photo-preview-inner">
+        <img id="photo-preview-img" src="" alt="Food photo" />
+        <button class="photo-clear-btn" onclick="clearPhoto()">✕</button>
+      </div>
+      <button class="btn-primary" id="scan-btn" onclick="scanPhoto()" style="width:100%;margin-top:10px">Analyse Photo</button>
+    </div>
+
+    <div class="status" id="track-status"></div>
+  </div>
+
+  <div class="log-header">
+    <div class="section-title">Today's Log</div>
+    <button class="btn-secondary" onclick="clearAll()">Clear All</button>
+  </div>
+
+  <div class="food-list" id="food-list">
+    <div class="empty-state">
+      <div class="empty-icon">🍽️</div>
+      Add halal food items above to start tracking
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════ METRICS & PLAN ══════════ -->
+<div class="panel" id="panel-metrics">
+
+  <div class="input-card">
+    <div class="metrics-grid">
+      <div class="ig"><label>Weight</label><input type="number" id="m-weight" placeholder="75" /></div>
+      <div class="ig"><label>Unit</label>
+        <select id="m-unit"><option value="kg">kg</option><option value="lbs">lbs</option></select>
+      </div>
+      <div class="ig"><label>Height (cm)</label><input type="number" id="m-height" placeholder="175" /></div>
+      <div class="ig"><label>Age</label><input type="number" id="m-age" placeholder="20" /></div>
+      <div class="ig"><label>Sex</label>
+        <select id="m-sex"><option value="male">Male</option><option value="female">Female</option></select>
+      </div>
+      <div class="ig"><label>Gym Sessions / Week</label><input type="number" id="m-gym" placeholder="3" min="0" max="14" /></div>
+      <div class="ig"><label>Daily Steps</label><input type="number" id="m-steps" placeholder="8000" /></div>
+      <div class="ig"><label>Other Activity</label><input type="text" id="m-other" placeholder="e.g. football, cycling…" /></div>
+    </div>
+    <button class="btn-primary" id="metrics-btn" onclick="calcMetrics()">Calculate My Targets</button>
+    <div class="status" id="metrics-status"></div>
+  </div>
+
+  <div id="metrics-results" style="display:none">
+
+    <!-- Full macro breakdown -->
+    <div class="results-card">
+      <h3 id="plan-mode-title">📈 Bulk Plan — Full Macro Breakdown</h3>
+      <div class="macro-breakdown">
+        <div class="mbd-card cal"><div class="mbd-label">Target Calories</div><div class="mbd-val" id="r-cal">—</div><div class="mbd-sub" id="r-cal-sub">kcal/day</div></div>
+        <div class="mbd-card prot"><div class="mbd-label">Protein</div><div class="mbd-val" id="r-prot">—</div><div class="mbd-sub" id="r-prot-sub">g/day</div></div>
+        <div class="mbd-card carb"><div class="mbd-label">Carbohydrates</div><div class="mbd-val" id="r-carb">—</div><div class="mbd-sub" id="r-carb-sub">g/day</div></div>
+        <div class="mbd-card fat"><div class="mbd-label">Fats</div><div class="mbd-val" id="r-fat">—</div><div class="mbd-sub" id="r-fat-sub">g/day</div></div>
+        <div class="mbd-card fibre"><div class="mbd-label">Fibre</div><div class="mbd-val" id="r-fibre">25–35</div><div class="mbd-sub">g/day (gut health)</div></div>
+        <div class="mbd-card water"><div class="mbd-label">Water</div><div class="mbd-val" id="r-water">—</div><div class="mbd-sub">litres/day</div></div>
+      </div>
+
+      <div class="mrr"><div class="mrr-label">TDEE (Maintenance)</div><div class="mrr-val" id="r-tdee" style="color:var(--gold)">—</div></div>
+      <div class="mrr"><div class="mrr-label">Calorie Surplus/Deficit</div><div class="mrr-val" id="r-delta">—</div></div>
+      <div class="mrr"><div class="mrr-label">BMI</div><div class="mrr-val" id="r-bmi">—</div></div>
+      <div class="mrr"><div class="mrr-label">Protein per kg bodyweight</div><div class="mrr-val" id="r-pkg" style="color:var(--accent)">—</div></div>
+      <div class="mrr"><div class="mrr-label">Macro Split (P / C / F)</div><div class="mrr-val" id="r-split" style="color:var(--mode-color)">—</div></div>
+    </div>
+
+    <div class="ai-advice" id="r-advice">Calculating personalised advice…</div>
+
+    <!-- Optimised Mode Plan -->
+    <div class="plan-section" id="plan-section">
+      <h3 id="plan-title">📈 Your Bulk Optimisation Plan</h3>
+      <p id="plan-subtitle">Everything you need to maximise muscle gain on a halal diet</p>
+      <div class="plan-pillars" id="plan-pillars">
+        <!-- filled by JS -->
+      </div>
+      <div class="plan-ai" id="plan-ai">Loading personalised plan…</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════ MEAL PLANNER ══════════ -->
+<div class="panel" id="panel-planner">
+  <div class="input-card">
+    <div class="ig" style="margin-bottom:12px">
+      <label>What food do you have at home?</label>
+      <textarea id="planner-foods" rows="4" placeholder="e.g. chicken breast, eggs, rice, onions, garlic, olive oil, tomatoes, cumin, chilli powder, Greek yoghurt…"></textarea>
+    </div>
+    <div class="ig" style="margin-bottom:14px">
+      <label>Preferences / notes</label>
+      <input type="text" id="planner-prefs" placeholder="e.g. quick to cook, high protein, spicy…" />
+    </div>
+    <button class="btn-primary" id="planner-btn" onclick="getMealPlan()">Generate Halal Meal Ideas</button>
+    <div class="status" id="planner-status"></div>
+  </div>
+  <div id="planner-result" style="display:none" class="rich-result"></div>
+</div>
+
+<!-- ══════════ DAILY PLAN ══════════ -->
+<div class="panel" id="panel-suggest">
+  <div class="input-card">
+    <p style="font-size:0.8rem;color:var(--muted);margin-bottom:14px">Full halal day plan tailored to your mode. Set metrics first for best results.</p>
+    <div class="ig" style="margin-bottom:12px">
+      <label>Food likes / dislikes</label>
+      <input type="text" id="sug-prefs" placeholder="e.g. love lamb, enjoy Middle Eastern food, hate fish…" />
+    </div>
+    <div class="ig" style="margin-bottom:14px">
+      <label>Cooking time</label>
+      <select id="sug-time">
+        <option value="quick">Quick (under 20 mins)</option>
+        <option value="medium">Medium (up to 45 mins)</option>
+        <option value="any">No limit</option>
+      </select>
+    </div>
+    <button class="btn-primary" id="sug-btn" onclick="getDailySuggestions()">Generate My Day Plan</button>
+    <div class="status" id="sug-status"></div>
+  </div>
+  <div id="sug-result" style="display:none" class="rich-result"></div>
+</div>
+
+</div><!-- /panels -->
+
+<script>
+// ── STATE ──
+let foods = [];
+let metrics = null;
+let currentMode = 'bulk';
+
+// ── MODE CONFIG ──
+const MODES = {
+  bulk: {
+    icon: '📈', label: 'BULK MODE', desc: 'Calorie surplus · High protein · Build lean mass',
+    calDelta: +300, protMult: 2.2, carbPct: 0.45, fatPct: 0.25,
+    planTitle: '📈 Your Bulk Optimisation Plan',
+    planSub: 'Everything you need to maximise muscle gain on a halal diet',
+    pillars: [
+      { title: 'Nutrition', tips: ['Eat 300–500 kcal above TDEE daily','Hit protein target every single day','Prioritise complex carbs around training','Don\'t fear dietary fats — eat 0.8–1g/kg'] },
+      { title: 'Training', tips: ['Focus on progressive overload','Compound lifts: squat, bench, deadlift, row','4–5 sessions/week optimal for hypertrophy','Track your lifts to ensure progression'] },
+      { title: 'Halal Protein Sources', tips: ['Chicken breast, lamb, beef (halal certified)','Eggs, Greek yoghurt, labneh','Lentils, chickpeas, kidney beans','Halal whey protein if needed'] },
+      { title: 'Timing', tips: ['Pre-workout: carbs + moderate protein','Post-workout: protein within 1–2 hours','Spread protein across 4–5 meals','Casein-rich foods (yoghurt) before bed'] }
+    ]
+  },
+  maintain: {
+    icon: '⚖️', label: 'MAINTAIN MODE', desc: 'Calorie balance · Steady weight · Sustain fitness',
+    calDelta: 0, protMult: 1.8, carbPct: 0.40, fatPct: 0.30,
+    planTitle: '⚖️ Your Maintenance Optimisation Plan',
+    planSub: 'Stay lean, strong and healthy with a balanced halal diet',
+    pillars: [
+      { title: 'Nutrition', tips: ['Eat at TDEE — track honestly','Prioritise food quality over restriction','Balance all three macros evenly','Allow for flexible eating within targets'] },
+      { title: 'Training', tips: ['3–4 sessions/week is plenty','Mix strength and cardio','Stay consistent — no need to push extremes','Deload weeks every 8–10 weeks'] },
+      { title: 'Halal Protein Sources', tips: ['Chicken, turkey, eggs, fish (halal)','Greek yoghurt, cottage cheese','Legumes: lentils, chickpeas','Halal deli meats in moderation'] },
+      { title: 'Lifestyle', tips: ['Prioritise 7–9 hours sleep','Manage stress — cortisol affects body comp','Stay active throughout the day','Weekly weigh-ins to monitor trends'] }
+    ]
+  },
+  cut: {
+    icon: '🔥', label: 'CUT MODE', desc: 'Calorie deficit · Max protein · Preserve muscle',
+    calDelta: -400, protMult: 2.4, carbPct: 0.30, fatPct: 0.25,
+    planTitle: '🔥 Your Cut Optimisation Plan',
+    planSub: 'Lose fat while protecting every gram of muscle on a halal diet',
+    pillars: [
+      { title: 'Nutrition', tips: ['400–500 kcal below TDEE max','Protein is your #1 priority — don\'t drop it','Lower carbs, keep fats moderate','Volume eating: veg, salads, lean protein'] },
+      { title: 'Training', tips: ['Keep lifting heavy to preserve muscle','Add 2–3 cardio sessions (LISS or HIIT)','Don\'t out-train a bad diet','Strength should stay the same on a good cut'] },
+      { title: 'Halal Protein Sources', tips: ['Chicken breast, turkey breast (lean)','Egg whites + 1–2 whole eggs','Low-fat Greek yoghurt, labneh','White fish if halal-certified available'] },
+      { title: 'Cut Tips', tips: ['Eat slowly — fullness takes 20 mins','Drink 2.5–3L water daily','Sleep 8hrs — poor sleep spikes hunger hormones','Track everything, even cooking oils'] }
+    ]
+  }
+};
+
+// ── MODE SWITCHER ──
+function setMode(m) {
+  currentMode = m;
+  document.body.dataset.mode = m;
+
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.m === m));
+
+  const cfg = MODES[m];
+  document.getElementById('mbanner-icon').textContent = cfg.icon;
+  document.getElementById('mbanner-title').textContent = cfg.label;
+  document.getElementById('mbanner-desc').textContent = cfg.desc;
+
+  if (metrics) {
+    applyMode();
+    renderPlanPillars();
+  }
+
+  renderTracker();
+}
+
+// ── TABS ──
+function switchTab(id) {
+  const ids = ['tracker','metrics','planner','suggest'];
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', ids[i] === id));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+}
+
+// ── API ──
+async function callClaude(prompt, sys = '') {
+  const body = { model: 'claude-sonnet-4-20250514', max_tokens: 1000, messages: [{ role: 'user', content: prompt }] };
+  if (sys) body.system = sys;
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  const data = await res.json();
+  return data.content.map(b => b.text || '').join('').trim();
+}
+
+function setStatus(id, msg, type = '') {
+  const el = document.getElementById(id);
+  el.className = 'status ' + type;
+  el.innerHTML = type === 'loading' ? `<div class="spinner"></div>${msg}` : msg;
+}
+
+// ── TRACKER ──
+document.getElementById('food-input').addEventListener('keydown', e => { if (e.key === 'Enter') addFood(); });
+document.getElementById('qty-input').addEventListener('keydown', e => { if (e.key === 'Enter') addFood(); });
+
+async function addFood() {
+  const food = document.getElementById('food-input').value.trim();
+  const qty = document.getElementById('qty-input').value.trim();
+  if (!food) { setStatus('track-status', 'Please enter a food item.', 'error'); return; }
+
+  document.getElementById('add-btn').disabled = true;
+  setStatus('track-status', `Looking up ${food}…`, 'loading');
+
+  const prompt = `You are an expert nutritionist with access to USDA, PHE, and international food databases.
+
+Nutritional info for: "${food}"${qty ? ` — amount: ${qty}` : ' — use a typical standard serving'}.
+
+IMPORTANT: Must be halal-compliant. Flag any haram concerns.
+
+Return ONLY valid JSON, no markdown:
+{
+  "name": "specific descriptive name",
+  "emoji": "relevant food emoji",
+  "calories": 0,
+  "protein": 0.0,
+  "fat": 0.0,
+  "carbs": 0.0,
+  "fibre": 0.0,
+  "per": "per Xg or serving",
+  "haram_warning": ""
+}
+
+Use precise values from food databases. haram_warning: only fill if genuine halal concern (alcohol, pork derivatives, gelatin source). Empty string if fine.`;
+
+  try {
+    const raw = await callClaude(prompt);
+    const p = JSON.parse(raw.replace(/```json|```/g, '').trim());
+
+    if (p.haram_warning) {
+      setStatus('track-status', `⚠️ Halal concern: ${p.haram_warning}`, 'error');
+      document.getElementById('add-btn').disabled = false;
+      return;
+    }
+
+    foods.push({
+      id: Date.now(),
+      name: p.name || food,
+      emoji: p.emoji || '🍽️',
+      calories: Math.round(p.calories || 0),
+      protein: +parseFloat(p.protein || 0).toFixed(1),
+      fat: +parseFloat(p.fat || 0).toFixed(1),
+      carbs: +parseFloat(p.carbs || 0).toFixed(1),
+      fibre: +parseFloat(p.fibre || 0).toFixed(1),
+      per: p.per || ''
+    });
+
+    document.getElementById('food-input').value = '';
+    document.getElementById('qty-input').value = '';
+    setStatus('track-status', '');
+    renderTracker();
+  } catch (e) {
+    setStatus('track-status', 'Could not fetch nutrition info. Try again.', 'error');
+  } finally {
+    document.getElementById('add-btn').disabled = false;
+  }
+}
+
+function deleteFood(id) { foods = foods.filter(f => f.id !== id); renderTracker(); }
+function clearAll() { foods = []; renderTracker(); }
+
+function renderTracker() {
+  const totCal = foods.reduce((s, f) => s + f.calories, 0);
+  const totProt = foods.reduce((s, f) => s + f.protein, 0);
+  const totCarb = foods.reduce((s, f) => s + f.carbs, 0);
+  const totFat = foods.reduce((s, f) => s + f.fat, 0);
+
+  document.getElementById('tot-cal').textContent = totCal.toLocaleString();
+  document.getElementById('tot-prot').textContent = totProt.toFixed(1);
+  document.getElementById('tot-carb').textContent = totCarb.toFixed(1);
+  document.getElementById('tot-fat').textContent = totFat.toFixed(1);
+
+  if (metrics) {
+    const ps = document.getElementById('progress-section');
+    ps.style.display = 'block';
+
+    const set = (pfId, pnId, ptId, cur, tgt, cls) => {
+      const pct = Math.min((cur / tgt) * 100, 100);
+      const fill = document.getElementById(pfId);
+      fill.style.width = pct + '%';
+      fill.className = 'prog-fill ' + cls + (cur > tgt * 1.05 ? ' over' : '');
+      document.getElementById(pnId).textContent = typeof cur === 'number' && !Number.isInteger(cur) ? cur.toFixed(1) : Math.round(cur);
+      document.getElementById(ptId).textContent = tgt;
+    };
+
+    set('pf-cal', 'pn-cal', 'pt-cal', totCal, metrics.calTarget, 'cal-f');
+    set('pf-prot', 'pn-prot', 'pt-prot', totProt, metrics.protTarget, 'prot-f');
+    set('pf-carb', 'pn-carb', 'pt-carb', totCarb, metrics.carbTarget, 'carb-f');
+    set('pf-fat', 'pn-fat', 'pt-fat', totFat, metrics.fatTarget, 'fat-f');
+  }
+
+  const list = document.getElementById('food-list');
+  if (!foods.length) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-icon">🍽️</div>Add halal food items to start tracking</div>';
+    return;
+  }
+
+  list.innerHTML = foods.map(f => `
+    <div class="food-item">
+      <div class="fi-emoji">${f.emoji}</div>
+      <div class="fi-info">
+        <div class="fi-name">${f.name}${f.fromPhoto ? '<span class="fi-photo-badge">📷 scanned</span>' : ''}</div>
+        <div class="fi-sub">${f.per}</div>
+      </div>
+      <div class="fi-macros">
+        <span class="mpill c">${f.calories}kcal</span>
+        <span class="mpill p">${f.protein}g P</span>
+        <span class="mpill cb">${f.carbs}g C</span>
+        <span class="mpill f">${f.fat}g F</span>
+      </div>
+      <button class="del-btn" onclick="deleteFood(${f.id})">✕</button>
+    </div>
+  `).join('');
+}
+
+// ── METRICS ──
+async function calcMetrics() {
+  const weight = parseFloat(document.getElementById('m-weight').value);
+  const unit = document.getElementById('m-unit').value;
+  const height = parseFloat(document.getElementById('m-height').value);
+  const age = parseFloat(document.getElementById('m-age').value);
+  const sex = document.getElementById('m-sex').value;
+  const gym = parseInt(document.getElementById('m-gym').value) || 0;
+  const steps = parseInt(document.getElementById('m-steps').value) || 5000;
+  const other = document.getElementById('m-other').value;
+
+  if (!weight || !height || !age) { setStatus('metrics-status', 'Please fill weight, height and age.', 'error'); return; }
+
+  document.getElementById('metrics-btn').disabled = true;
+  setStatus('metrics-status', 'Calculating your full macro plan…', 'loading');
+
+  const weightKg = unit === 'lbs' ? weight * 0.453592 : weight;
+  const bmi = (weightKg / ((height / 100) ** 2)).toFixed(1);
+
+  // Mifflin-St Jeor BMR
+  const bmr = sex === 'male'
+    ? 10 * weightKg + 6.25 * height - 5 * age + 5
+    : 10 * weightKg + 6.25 * height - 5 * age - 161;
+
+  let actMult = 1.2;
+  if (steps > 12000) actMult += 0.15;
+  else if (steps > 8000) actMult += 0.1;
+  else if (steps > 5000) actMult += 0.05;
+  if (gym >= 5) actMult += 0.25;
+  else if (gym >= 3) actMult += 0.175;
+  else if (gym >= 1) actMult += 0.1;
+
+  const tdee = Math.round(bmr * actMult);
+
+  // Store base for mode switching
+  metrics = { tdee, weightKg, height, age, sex, gym, steps, other, bmi };
+  applyMode();
+
+  // AI advice
+  const cfg = MODES[currentMode];
+  const advPrompt = `As a sports nutritionist advising a Muslim athlete:
+Stats: ${weightKg.toFixed(1)}kg, ${height}cm, age ${age}, ${sex}, ${gym} gym sessions/week, ${steps} steps/day${other ? ', '+other : ''}
+Mode: ${currentMode.toUpperCase()}
+Targets: ${metrics.calTarget}kcal, ${metrics.protTarget}g protein, ${metrics.carbTarget}g carbs, ${metrics.fatTarget}g fat
+
+Give 3-4 sentences of practical, direct personalised advice for this specific mode and stats. Include one halal-specific tip (e.g. good halal protein sources for their goal). Be specific to their numbers, not generic.`;
+
+  const planPrompt = `As a Muslim fitness coach, give a 3-4 sentence personalised ${currentMode} plan overview for:
+${weightKg.toFixed(1)}kg, ${height}cm, ${age}y ${sex}, ${gym}x gym/week, ${steps} steps/day
+Targets: ${metrics.calTarget}kcal, ${metrics.protTarget}g protein
+Mode: ${currentMode.toUpperCase()}
+Be specific, practical, and mention halal food choices. Focus on what makes a ${currentMode} successful for their exact stats.`;
+
+  try {
+    const [advice, planText] = await Promise.all([callClaude(advPrompt), callClaude(planPrompt)]);
+    document.getElementById('r-advice').textContent = advice;
+    document.getElementById('plan-ai').textContent = planText;
+    document.getElementById('metrics-results').style.display = 'block';
+    setStatus('metrics-status', '');
+    renderTracker();
+  } catch (e) {
+    setStatus('metrics-status', 'Error getting advice. Please try again.', 'error');
+  } finally {
+    document.getElementById('metrics-btn').disabled = false;
+  }
+}
+
+function applyMode() {
+  if (!metrics) return;
+  const cfg = MODES[currentMode];
+  const m = metrics;
+
+  const calTarget = Math.round(m.tdee + cfg.calDelta);
+  const protTarget = Math.round(m.weightKg * cfg.protMult);
+  const protCals = protTarget * 4;
+  const fatTarget = Math.round((calTarget * cfg.fatPct) / 9);
+  const fatCals = fatTarget * 9;
+  const carbTarget = Math.round((calTarget - protCals - fatCals) / 4);
+  const protPct = Math.round((protCals / calTarget) * 100);
+  const fatPct = Math.round((fatCals / calTarget) * 100);
+  const carbPct = 100 - protPct - fatPct;
+
+  metrics.calTarget = calTarget;
+  metrics.protTarget = protTarget;
+  metrics.carbTarget = carbTarget;
+  metrics.fatTarget = fatTarget;
+
+  const delta = calTarget - m.tdee;
+  const deltaStr = delta > 0 ? `+${delta} kcal surplus` : delta < 0 ? `${delta} kcal deficit` : 'At maintenance';
+  const water = (m.weightKg * 0.033 + (metrics.gym || 0) * 0.5).toFixed(1);
+
+  document.getElementById('plan-mode-title').textContent = cfg.planTitle.replace('Plan','Breakdown').replace('📈 ','').replace('⚖️ ','').replace('🔥 ','') + ' — Full Macro Breakdown';
+  document.getElementById('r-cal').textContent = calTarget.toLocaleString();
+  document.getElementById('r-cal-sub').textContent = `${deltaStr}`;
+  document.getElementById('r-prot').textContent = protTarget;
+  document.getElementById('r-prot-sub').textContent = `${(m.weightKg * cfg.protMult).toFixed(1)}g — ${protPct}% of calories`;
+  document.getElementById('r-carb').textContent = carbTarget;
+  document.getElementById('r-carb-sub').textContent = `${carbPct}% of calories`;
+  document.getElementById('r-fat').textContent = fatTarget;
+  document.getElementById('r-fat-sub').textContent = `${fatPct}% of calories`;
+  document.getElementById('r-water').textContent = water;
+  document.getElementById('r-tdee').textContent = m.tdee.toLocaleString() + ' kcal';
+  document.getElementById('r-delta').textContent = deltaStr;
+  document.getElementById('r-bmi').textContent = m.bmi;
+  document.getElementById('r-pkg').textContent = cfg.protMult.toFixed(1) + 'g per kg';
+  document.getElementById('r-split').textContent = `${protPct}% / ${carbPct}% / ${fatPct}%`;
+  document.getElementById('plan-title').textContent = cfg.planTitle;
+  document.getElementById('plan-subtitle').textContent = cfg.planSub;
+
+  renderPlanPillars();
+}
+
+function renderPlanPillars() {
+  const cfg = MODES[currentMode];
+  document.getElementById('plan-pillars').innerHTML = cfg.pillars.map(p => `
+    <div class="pillar">
+      <div class="pillar-title">${p.title}</div>
+      <ul>${p.tips.map(t => `<li>${t}</li>`).join('')}</ul>
+    </div>
+  `).join('');
+}
+
+// ── MEAL PLANNER ──
+async function getMealPlan() {
+  const foodList = document.getElementById('planner-foods').value.trim();
+  const prefs = document.getElementById('planner-prefs').value.trim();
+  if (!foodList) { setStatus('planner-status', 'Please list the food you have at home.', 'error'); return; }
+
+  document.getElementById('planner-btn').disabled = true;
+  setStatus('planner-status', 'Creating halal meal ideas…', 'loading');
+
+  const mInfo = metrics ? `Mode: ${currentMode.toUpperCase()}. Targets: ${metrics.protTarget}g protein, ${metrics.calTarget}kcal, ${metrics.carbTarget}g carbs, ${metrics.fatTarget}g fat.` : `Mode: ${currentMode.toUpperCase()}. Prioritise high protein.`;
+
+  const prompt = `You are a halal chef and nutritionist. Create 2-3 halal meal ideas using ONLY: ${foodList}.
+${prefs ? 'Preferences: ' + prefs : ''}
+${mInfo}
+
+For each meal: meal name, brief description, exact ingredients + quantities, numbered cooking steps, and macros (calories, protein, carbs, fat). Format with clear ## headings for each meal. All meals 100% halal. Tailor macros to the user's ${currentMode} mode.`;
+
+  try {
+    const result = await callClaude(prompt);
+    const div = document.getElementById('planner-result');
+    div.innerHTML = `<h3>Your Halal ${currentMode.charAt(0).toUpperCase()+currentMode.slice(1)} Meal Ideas 🍳</h3>` + mdToHTML(result);
+    div.style.display = 'block';
+    setStatus('planner-status', '');
+  } catch (e) {
+    setStatus('planner-status', 'Error generating meal ideas. Try again.', 'error');
+  } finally {
+    document.getElementById('planner-btn').disabled = false;
+  }
+}
+
+// ── DAILY SUGGESTIONS ──
+async function getDailySuggestions() {
+  const prefs = document.getElementById('sug-prefs').value.trim();
+  const time = document.getElementById('sug-time').value;
+  const timeMap = { quick: 'under 20 mins', medium: 'up to 45 mins', any: 'any cook time' };
+
+  document.getElementById('sug-btn').disabled = true;
+  setStatus('sug-status', 'Building your personalised halal day plan…', 'loading');
+
+  const mStr = metrics ? `Targets: ${metrics.calTarget}kcal, ${metrics.protTarget}g protein, ${metrics.carbTarget}g carbs, ${metrics.fatTarget}g fat.` : 'Aim for high protein ~2200kcal.';
+
+  const prompt = `You are a halal nutritionist. Full day halal meal plan (5 meals) tailored for ${currentMode.toUpperCase()} mode.
+${mStr}
+Cook time: ${timeMap[time]}. ${prefs ? 'Preferences: '+prefs : ''}
+
+For each meal include:
+## [Time] — [Meal Name]
+Description (2 sentences). Ingredients. Macros: X kcal | Xg protein | Xg carbs | Xg fat.
+
+Distribute protein evenly. All food 100% halal. Focus on ${currentMode === 'bulk' ? 'calorie-dense nutrient-rich foods' : currentMode === 'cut' ? 'high volume low calorie foods with maximum protein' : 'balanced whole foods'}. End with a ## Daily Totals summary.`;
+
+  try {
+    const result = await callClaude(prompt);
+    const div = document.getElementById('sug-result');
+    div.innerHTML = `<h3>Your Halal ${currentMode.charAt(0).toUpperCase()+currentMode.slice(1)} Day Plan 📅</h3>` + mdToHTML(result);
+    div.style.display = 'block';
+    setStatus('sug-status', '');
+  } catch (e) {
+    setStatus('sug-status', 'Error generating plan. Try again.', 'error');
+  } finally {
+    document.getElementById('sug-btn').disabled = false;
+  }
+}
+
+// ── MARKDOWN ──
+function mdToHTML(md) {
+  return md
+    .replace(/## (.+)/g, '<h4>$1</h4>')
+    .replace(/### (.+)/g, '<h4>$1</h4>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/^\d+\. (.+)/gm, '<li>$1</li>')
+    .replace(/^[-•] (.+)/gm, '<li>$1</li>')
+    .replace(/(<li>[\s\S]*?<\/li>\n?)+/g, s => `<ul>${s}</ul>`)
+    .replace(/\n\n+/g, '</p><p>')
+    .replace(/^([^<\n].+)$/gm, '$1')
+    .replace(/<p>\s*<\/p>/g, '') || `<p>${md}</p>`;
+}
+
+// Init
+renderPlanPillars();
+
+// ── PHOTO SCAN ──
+let photoBase64 = null;
+
+function handlePhoto(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    const dataUrl = ev.target.result;
+    photoBase64 = dataUrl.split(',')[1];
+    document.getElementById('photo-preview-img').src = dataUrl;
+    document.getElementById('photo-preview-wrap').style.display = 'block';
+    setStatus('track-status', '');
+  };
+  reader.readAsDataURL(file);
+  // reset so same file can be re-selected
+  e.target.value = '';
+}
+
+function clearPhoto() {
+  photoBase64 = null;
+  document.getElementById('photo-preview-wrap').style.display = 'none';
+  document.getElementById('photo-preview-img').src = '';
+  setStatus('track-status', '');
+}
+
+async function scanPhoto() {
+  if (!photoBase64) return;
+  document.getElementById('scan-btn').disabled = true;
+  document.getElementById('add-btn').disabled = true;
+  setStatus('track-status', 'Analysing your food photo…', 'loading');
+
+  const prompt = `You are an expert nutritionist and food recognition AI. Analyse this food photo carefully.
+
+Identify ALL food items visible in the image. For each distinct food item or component of the meal, estimate:
+- What it is (be specific — e.g. "Grilled chicken breast" not just "chicken")
+- Estimated portion size visible
+- Nutritional values for that portion
+- Whether it is halal-compatible (flag if you see pork, alcohol, or uncertain ingredients)
+
+Return ONLY valid JSON, no markdown:
+{
+  "meal_description": "brief overall description of what you see",
+  "items": [
+    {
+      "name": "specific food name",
+      "emoji": "relevant emoji",
+      "portion": "estimated portion e.g. ~150g",
+      "calories": 0,
+      "protein": 0.0,
+      "fat": 0.0,
+      "carbs": 0.0,
+      "haram_warning": ""
+    }
+  ],
+  "confidence": "high/medium/low",
+  "notes": "any caveats about the estimate"
+}
+
+Be as accurate as possible. If multiple items are on the plate, list each separately. haram_warning only if genuine concern.`;
+
+  try {
+    const body = {
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1200,
+      messages: [{
+        role: 'user',
+        content: [
+          { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: photoBase64 } },
+          { type: 'text', text: prompt }
+        ]
+      }]
+    };
+
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+
+    const data = await res.json();
+    const raw = data.content.map(b => b.text || '').join('').trim();
+    const parsed = JSON.parse(raw.replace(/```json|```/g, '').trim());
+
+    // Check for haram warnings
+    const haramItems = parsed.items.filter(i => i.haram_warning);
+    if (haramItems.length) {
+      setStatus('track-status', `⚠️ Possible halal concern in: ${haramItems.map(i=>i.name).join(', ')}`, 'error');
+      document.getElementById('scan-btn').disabled = false;
+      document.getElementById('add-btn').disabled = false;
+      return;
+    }
+
+    // Add all items
+    let added = 0;
+    for (const item of parsed.items) {
+      foods.push({
+        id: Date.now() + added,
+        name: item.name,
+        emoji: item.emoji || '📷',
+        calories: Math.round(item.calories || 0),
+        protein: +parseFloat(item.protein || 0).toFixed(1),
+        fat: +parseFloat(item.fat || 0).toFixed(1),
+        carbs: +parseFloat(item.carbs || 0).toFixed(1),
+        fibre: 0,
+        per: item.portion || 'estimated from photo',
+        fromPhoto: true
+      });
+      added++;
+    }
+
+    clearPhoto();
+    const confNote = parsed.confidence === 'low' ? ' (low confidence — check values)' : '';
+    setStatus('track-status', `📷 Added ${added} item${added>1?'s':''} from photo${confNote}${parsed.notes ? ' · ' + parsed.notes : ''}`, '');
+    renderTracker();
+
+  } catch (err) {
+    setStatus('track-status', 'Could not analyse photo. Try a clearer image.', 'error');
+    console.error(err);
+  } finally {
+    document.getElementById('scan-btn').disabled = false;
+    document.getElementById('add-btn').disabled = false;
+  }
+}
+</script>
+</body>
+</html>
